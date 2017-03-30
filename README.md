@@ -1,4 +1,4 @@
-# numerical-methods
+# Description
 This is a collection of various numerical methods implemented in Python
 
 # Root finding methods
