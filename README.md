@@ -1,5 +1,7 @@
 # Description
-This is a collection of various numerical methods implemented in Python
+This is a collection of various numerical methods implemented in Python. Every method is implemented
+using Numpy arrays. The intention of this package is for anyone who wants to have simple and concices
+implementation of various different numerical methods.
 
 # Root finding methods
 - Bisection
