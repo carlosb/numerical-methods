@@ -17,6 +17,8 @@ implementation of various different numerical methods.
 - Broyden's method
 - Newton's method with cushioning
 
+![alt text](doc/images/syseq_cover.png)
+
 # Optimization in One Variable
 - Golden section search
 - Successive parabolic interpolation
