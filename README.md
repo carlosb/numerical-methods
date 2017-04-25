@@ -8,6 +8,8 @@ This is a collection of various numerical methods implemented in Python
 - Cuadratic linear interpolation
 - Fractional linear interpolation
 
+![alt text](doc/images/root_cover.png)
+
 # Systems of Equations
 - Newton's method
 - Broyden's method
