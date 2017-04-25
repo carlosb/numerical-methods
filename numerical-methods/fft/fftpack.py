@@ -1,43 +1,106 @@
 """
 Discrete Fourier Transform
 
-@file fftpack.py
-@brief Contains the routines to calculate different FFT
+Routines in this module:
+
+fft(x)
+ifft(F)
 """
 import numpy as np
 
 __all__ = ['fft', 'ifft']
 
+
 def fft_r(x, y, n, w):
+    """
+    Recursive method for calculation of the fft.
+
+    This method is a recursive implementation of the fft transform.
+
+    Parameters
+    ----------
+    x : array_like
+        This is the signal that will be transformed.
+    y : array_like
+        This is the transformed signal.
+    n : int
+        Number of entries in the signal.
+    w : array_like
+        Fourier divisor
+
+    Returns
+    -------
+    y : array_like
+        Transformed signal.
+
+    """
     if n == 1:
         y[0] = x[0]
     else:
         p = np.zeros(n) + np.zeros(n) * 1j
         s = np.zeros(n) + np.zeros(n) * 1j
-        
-        for k in range(n/2):
-            p[k] = x[2*k]
-            s[k] = x[2*k + 1]
-        
-        q = np.zeros(n/2) + np.zeros(n/2) * 1j
-        t = np.zeros(n/2) + np.zeros(n/2) * 1j
-        
-        fft_r(p, q, n/2, w**2)
-        fft_r(s, t, n/2, w**2)
-        
+
+        for k in range(n / 2):
+            p[k] = x[2 * k]
+            s[k] = x[2 * k + 1]
+
+        q = np.zeros(n / 2) + np.zeros(n / 2) * 1j
+        t = np.zeros(n / 2) + np.zeros(n / 2) * 1j
+
+        fft_r(p, q, n / 2, w ** 2)
+        fft_r(s, t, n / 2, w ** 2)
+
         for k in range(n):
-            y[k] = q[k % (n/2)] + (w**k) * t[k % (n/2)]
-            
+            y[k] = q[k % (n / 2)] + (w ** k) * t[k % (n / 2)]
+
     return y
 
 
 def fft(x):
-	PI = np.pi
-	n = len(x)
-	y = np.zeros(n) + np.zeros(n) * 1j
-	w = np.cos(2*np.pi/n) + np.sin(2*np.pi/n) * 1j
-	return fft_r(x,y,n,w)
+    """
+    Calculates the fourier transform for a unidimensional
+    sampled signal x.
+
+    This method calculates the Discrete Fourier Transform of
+    a signal x. It uses the Fast Fourier Transform method
+    to make this computation.
+
+    Parameters
+    ----------
+    x : array_like
+        The signal.
+
+    Returns
+    -------
+    F : array_like
+        DFT of the signal x.
+
+    """
+    n = len(x)
+    y = np.zeros(n) + np.zeros(n) * 1j
+    w = np.cos(2 * np.pi / n) + np.sin(2 * np.pi / n) * 1j
+    F = fft_r(x, y, n, w)
+    return F
+
 
 def ifft(F):
-    f = np.conj( fft( np.conj(F) ) )
+    """
+    Calculates the inverse fourier transform for a signal
+    transformed in the frequency spectrum.
+
+    This method calculates the Inverse Fourier Transform of
+    a transformed signal F.
+
+    Parameters
+    ----------
+    F : array_like
+        Signal F in the frequency spectrum.
+
+    Returns
+    -------
+    f : array_like
+        Inverse Fourier Transform of the signal F.
+
+    """
+    f = np.conj(fft(np.conj(F)))
     return f
