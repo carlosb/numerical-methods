@@ -39,4 +39,5 @@ implementation of various different numerical methods.
 - FFT
 - Inverse FFT
 
+![alt text](doc/images/fourier_cover.png)
 
