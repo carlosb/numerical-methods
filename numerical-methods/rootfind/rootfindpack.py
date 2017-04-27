@@ -1,10 +1,14 @@
 """
 Root finding methods
+====================
 
 Routines in this module:
 
-bisection(f, a, b, eps=0.001)
-newton(f, df, eps=0.001)
+bisection(f, a, b, eps=1e-5)
+newton(f, df, eps=1e-5)
+secant(f, x0, x1, eps=1e-5)
+inv_cuadratic_interp(f, a, b, c, eps=1e-5)
+lin_fracc_interp(f, a, b, c, eps=1e-5)
 """
 
 import numpy as np
@@ -29,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 __all__ = ['bisection', 'newton', 'secant']
 
 
-def bisection(f, a, b, eps=0.001):
+def bisection(f, a, b, eps=1e-5):
     """
     Find root of f.
 
@@ -66,7 +70,7 @@ def bisection(f, a, b, eps=0.001):
     return m
 
 
-def newton(f, df, x0, eps=0.001):
+def newton(f, df, x0, eps=1e-5):
     """
     Find root of f.
 
@@ -107,7 +111,7 @@ def newton(f, df, x0, eps=0.001):
     return root
 
 
-def secant(f, x0, x1, eps=0.001):
+def secant(f, x0, x1, eps=1e-5):
     """
     Parameters
     ----------
@@ -144,7 +148,7 @@ def secant(f, x0, x1, eps=0.001):
     return root
 
 
-def inv_cuadratic_interp(f, a, b, c, eps=0.001):
+def inv_cuadratic_interp(f, a, b, c, eps=1e-5):
     """
     Find root of f.
 
@@ -189,7 +193,7 @@ def inv_cuadratic_interp(f, a, b, c, eps=0.001):
     return root
 
 
-def lin_fracc_interp(f, a, b, c, eps=0.001):
+def lin_fracc_interp(f, a, b, c, eps=1e-5):
     """
     Find root of f.
 

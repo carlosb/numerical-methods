@@ -42,7 +42,8 @@ __all__ = ['golden_section',
            'successive_parabolic_interp',
            'newton1',
            'newtonn',
-           'gradient_descent']
+           'gradient_descent',
+           'bfgs']
 
 
 def golden_section(a, b, f, eps=1e-5):
