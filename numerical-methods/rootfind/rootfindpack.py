@@ -5,10 +5,12 @@ Root finding methods
 Routines in this module:
 
 bisection(f, a, b, eps=1e-5)
-newton(f, df, eps=1e-5)
+newton1(f, df, eps=1e-5)
+newtonn(f, J, x0, eps=1e-5)
 secant(f, x0, x1, eps=1e-5)
 inv_cuadratic_interp(f, a, b, c, eps=1e-5)
 lin_fracc_interp(f, a, b, c, eps=1e-5)
+broyden(f, x0, B0, eps=1e-5)
 """
 
 import numpy as np
@@ -30,7 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 '''
 
-__all__ = ['bisection', 'newton', 'secant']
+__all__ = ['bisection', 'newton1', 'secant', 'newtonn',
+           'inv_cuadratic_interp', 'lin_fracc_interp']
 
 
 def bisection(f, a, b, eps=1e-5):
@@ -42,18 +45,18 @@ def bisection(f, a, b, eps=1e-5):
     Parameters
     ----------
     f : function
-        Function we want to find the root of.
+            Function we want to find the root of.
     a : float
-        Lower bound.
+            Lower bound.
     b : float
-        High bound.
+            High bound.
     eps : float
-        Tolerance.
+            Tolerance.
 
     Returns
     -------
     m : float
-        Root of f.
+            Root of f.
 
     """
     if a > b:
@@ -70,7 +73,7 @@ def bisection(f, a, b, eps=1e-5):
     return m
 
 
-def newton(f, df, x0, eps=1e-5):
+def newton1(f, df, x0, eps=1e-5):
     """
     Find root of f.
 
@@ -79,18 +82,18 @@ def newton(f, df, x0, eps=1e-5):
     Parameters
     ----------
     f : function
-        Function we want to find the root of.
+            Function we want to find the root of.
     df : function
-        Derivative of f.
+            Derivative of f.
     x0 : float
-        This is the starting point for the method.
+            This is the starting point for the method.
     eps : float
-        Tolerance.
+            Tolerance.
 
     Returns
     -------
     root : float
-        Root of f.
+            Root of f.
 
     """
     x_old = np.float(x0)
@@ -116,18 +119,18 @@ def secant(f, x0, x1, eps=1e-5):
     Parameters
     ----------
     f : function
-        Function we want to find the root of.
+            Function we want to find the root of.
     x0 : float
-        First initial value "close" to the root of f.
+            First initial value "close" to the root of f.
     x1: float
-        Second initial value "close" to the root of f.
+            Second initial value "close" to the root of f.
     eps : float
-        Tolerance.
+            Tolerance.
 
     Returns
     -------
     root : float
-        Root of f.
+            Root of f.
 
     """
     x_old_0 = x0
@@ -158,18 +161,18 @@ def inv_cuadratic_interp(f, a, b, c, eps=1e-5):
     Parameters
     ----------
     f : function
-        Function we want to find the root of.
+            Function we want to find the root of.
     a : float
-        First initial value.
+            First initial value.
     b : float
-        Second initial value.
+            Second initial value.
     c : float
-        Third initial value.
+            Third initial value.
 
     Returns
     -------
     root : float
-        Root of f.
+            Root of f.
 
     """
     while True:
@@ -203,18 +206,18 @@ def lin_fracc_interp(f, a, b, c, eps=1e-5):
     Parameters
     ----------
     f : function
-        Function we want to find the root of.
+            Function we want to find the root of.
     a : float
-        First initial value.
+            First initial value.
     b : float
-        Second initial value.
+            Second initial value.
     c : float
-        Third initial value.
+            Third initial value.
 
     Returns
     -------
     root : float
-        Root of f.
+            Root of f.
     """
     while True:
         numerator = (a - c) * (b - c) * (f(a) - f(b)) * f(c)
@@ -231,6 +234,96 @@ def lin_fracc_interp(f, a, b, c, eps=1e-5):
 
         if(abs(f(x_new)) < eps):
             break
+
+    root = x_new
+    return root
+
+
+def broyden(f, x0, B0, eps=1e-5):
+    """
+    Finds roots for functions of k-variables.
+
+    This function utilizes Broyden's method to find roots in a
+    k-dimensional function f utilizing the initial Jacobian B0
+    at x0.
+
+    Parameters
+    ----------
+    f : function which takes an array_like matrix and
+    returns an array_like matrix
+        Function we want to find the root of.
+    x0 : array_like
+        Initial point.
+    B0 : array_like
+        Jacobian of function at x0.
+    eps : float
+        Error tolerance.
+
+    Returns
+    -------
+    root : array_like
+        Root of function.
+    """
+    x_new = x0
+    B_new = B0
+    while True:
+        x_old = x_new
+        B_old = B_new
+
+        s = np.dot(np.linalg.inv(B_old), -f(x_old).T)  # solve for s
+        x_new = x_old + s
+
+        y = f(x_new) - f(x_old)
+
+        B_new = B_old + (np.dot((y - np.dot(B_old, s)), s.T)
+                         ) / (np.dot(s.T, s))
+
+        if(np.all(np.abs(x_old - x_new) <= eps)):
+            break
+
+    root = x_new
+    return root
+
+
+def newtonn(f, J, x0, eps=1e-5):
+    """
+    Finds roots for functions of k-variables.
+
+    This function utilizes Newton's method for root finding
+    to find roots in a k-dimensional function. To do this,
+    it takes the Jacobian of the function and an initial
+    point.
+
+    Parameters
+    ----------
+    f : function which takes an array_like matrix and
+    returns an array_like matrix
+    J : function returning an array_like matrix
+        Jacobian of function.
+    x0 : array_like
+        Initial point.
+    eps : float
+        Error tolerance.
+
+    Returns
+    -------
+    root : array_like
+        Root of function.
+    """
+    x_old = x0
+    x_new = x_old
+
+    try:
+        while True:
+            x_old = x_new
+            x_new = x_old - np.dot(np.linalg.inv(J(x0)), f(x_old))
+
+            if(np.all(np.abs(x_old - x_new) <= eps)):
+                break
+
+    except np.linalg.LinAlgError:
+        print 'Error during iteration. Matrix is probably singular'
+        return None
 
     root = x_new
     return root
