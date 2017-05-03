@@ -46,9 +46,9 @@ __all__ = ['golden_section',
            'bfgs']
 
 
-def golden_section(a, b, f, eps=1e-5):
+def golden_section(a, b, f, eps=1e-5, display=False):
     """
-    Finds a minimum in the interval [a,b].
+    Finds a minimum of a function in the interval [a,b].
 
     This function finds a minimum in the interval [a,b] for a
     one dimensional function f using the Golden Section method.
@@ -56,19 +56,24 @@ def golden_section(a, b, f, eps=1e-5):
     Parameters
     ----------
     a : float
-            Lower bound of interval.
+        Lower bound of interval.
     b : float
-            Higher bound of interval.
+        Higher bound of interval.
     f : function
-            Function to be minimized.
+        Function to be minimized.
     eps : float
-            Error tolerance.
+        Error tolerance.
 
     Returns
     -------
     x_ : float
             A local minimum in the interval [a,b].
+    iterations : int
+            Number of iterations taken to reach minimum.
+
     """
+    iterations = 0
+
     tau = (np.sqrt(5.) - 1.) / 2.
 
     x1 = a + (1 - tau) * (b - a)
@@ -78,6 +83,12 @@ def golden_section(a, b, f, eps=1e-5):
     f2 = f(x2)
 
     while abs(b - a) > eps:
+
+        if display:
+            print 'iteration ', iterations
+            print 'x1: ', x1, 'x2: ', x2
+        iterations += 1
+
         if(f1 > f2):
             a = x1
             x1 = x2
@@ -92,10 +103,10 @@ def golden_section(a, b, f, eps=1e-5):
             f1 = f(x1)
 
     x_ = (x1 + x2) / 2.
-    return x_
+    return x_, iterations
 
 
-def successive_parabolic_interp(u, v, w, f, eps=1e-5):
+def successive_parabolic_interp(u, v, w, f, eps=1e-5, display=False):
     """
     Finds the a minimum with initial values u, v, w close to the minimum.
 
@@ -105,32 +116,40 @@ def successive_parabolic_interp(u, v, w, f, eps=1e-5):
     Parameters
     ----------
     u : float
-            First initial value.
+        First initial value.
     v : float
-            Second initial value.
+        Second initial value.
     w : float
-            Third initial value.
+        Third initial value.
     f : function
-            Function to be minimized
+        Function to be minimized
     eps : float
-            Error tolerance.
+        Error tolerance.
 
     Returns
     -------
     x_ : float
-            Local minimum of f.
-
+        Local minimum of f.
+    iterations : int
+        Number of iterations taken to reach minimum.
     Notes
     -----
     This method will order the values such that u < v < w.
 
     """
+    iterations = 0
+
     u, v, w = sorted([u, v, w])
     while True:
         p = (f(w) - f(v)) * (w - u)**2 - (f(w) - f(u)) * (w - v)**2
         q = 2. * ((f(w) - f(v)) * (w - u) - (f(w) - f(u)) * (w - v))
 
         x = w - (p / float(q))
+
+        if display:
+            print 'iteration ', iterations
+            print 'x:', x
+        iterations += 1
 
         if(abs(x - w) <= eps):
             break
@@ -140,10 +159,10 @@ def successive_parabolic_interp(u, v, w, f, eps=1e-5):
         w = x
 
     x_ = w
-    return x_
+    return x_, iterations
 
 
-def newton1(x0, g, h, eps=1e-5):
+def newton1(x0, g, h, eps=1e-5, display=False):
     """
     Minimizes a one dimensional function with first derivative g
     and second derivative h.
@@ -155,33 +174,42 @@ def newton1(x0, g, h, eps=1e-5):
     Parameters
     ----------
     x0 : float
-            Initial value.
+        Initial value.
     g : function
-            First derivative of a function f.
+        First derivative of a function f.
     h : function
-            Second derivative of a function f.
+        Second derivative of a function f.
     eps : float
-            Error tolerance.
+        Error tolerance.
 
     Returns
     -------
     x_ : float
-            Local minimum of the function f with first and second derivatives g
-            and h.
+        Local minimum of the function f with first and second derivatives g
+        and h.
+    iterations : int
+        Number of iterations taken to reach minimum.
     """
-    x_new = x0
+    iterations = 0
 
+    x_new = x0
     while True:
         x_old = x_new
         x_new = x_old - g(x_old) / float(h(x_old))
+
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
+
         if(abs(x_old - x_new) <= eps):
             break
 
     x_ = x_new
-    return x_
+    return x_, iterations
 
 
-def newtonn(x0, g, h, eps=1e-5):
+def newtonn(x0, g, h, eps=1e-5, display=False):
     """
     Minimizes an n-dimensional function with gradient g and hessian h.
 
@@ -191,32 +219,41 @@ def newtonn(x0, g, h, eps=1e-5):
     Parameters
     ----------
     x0 : array_like
-            Initial point.
+        Initial point.
     g : function returning array_like matrix
-            Gradient of a function f.
+        Gradient of a function f.
     h : function returning array_like matrix
-            Hessian of a function f.
+        Hessian of a function f.
 
     Returns
     -------
     x_ : array_like
             Local minimum of the function f with gradient and hessian g and h.
+    iterations : int
+            Number of iterations taken to reach minimum.
     """
-    x_new = np.array(x0, copy=True)
+    iterations = 0
 
+    x_new = np.array(x0, copy=True)
     while True:
         x_old = x_new
         x_new = x_old - np.dot(np.linalg.inv(h(x_old)), g(x_old))
+
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
 
         if((np.abs(x_old - x_new) < eps).all()):
             break
 
     x_ = x_new
-    return x_
+    return x_, iterations
 
 
 def nelder_mead(xs0, n, f, eps=1e-5,
-                alpha=1., beta=2., gamma=0.5, sigma=0.5):
+                alpha=1., beta=2., gamma=0.5,
+                sigma=0.5, display=False):
     """
     Minimizes an n-dimensional function f by passing n+1 initial values.
 
@@ -247,7 +284,11 @@ def nelder_mead(xs0, n, f, eps=1e-5,
     -------
     x_ : array_like
         Local minimum of f.
+    iterations : int
+        Number of iterations taken to reach minimum.
     """
+    iterations = 0
+
     xs = np.array(xs0)
 
     n += 1
@@ -257,13 +298,18 @@ def nelder_mead(xs0, n, f, eps=1e-5,
 
     x_new = np.zeros(n - 1)
     while True:
-
         # order
         ps_l = []
         for x in xs:
             ps_l.append((x, f(x)))
         ps_l = np.array(sorted(ps_l, key=lambda tu: tu[1]))
         xs = ps_l[:, 0]
+
+        # display information
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
 
         # check for convergence
         x_old = x_new
@@ -305,7 +351,7 @@ def nelder_mead(xs0, n, f, eps=1e-5,
             xs[i] = xs[0] + sigma * (xs[i] - xs[0])
 
     x_ = xs[0]  # return best point
-    return x_
+    return x_, iterations
 
 
 def backtrack(alpha, rho, c, x, f, grad_f, p):
@@ -323,7 +369,8 @@ def backtrack(alpha, rho, c, x, f, grad_f, p):
     return alpha
 
 
-def gradient_descent(x0, f, g, eps=1e-5, rho=0.5, c=0.1, alpha=1e-3):
+def gradient_descent(x0, f, g, eps=1e-5, rho=0.5,
+                     c=0.1, alpha=1e-5, display=False):
     """
     Minimizes an n-dimensional function given the function f and its gradient.
 
@@ -362,21 +409,27 @@ def gradient_descent(x0, f, g, eps=1e-5, rho=0.5, c=0.1, alpha=1e-3):
       SIAM Publications. ISBN 978-0-898713-64-0.
 
     """
-    x_new = x0
+    iterations = 0
 
+    x_new = x0
     while(True):
         x_old = x_new
         alpha = backtrack(alpha, rho, c, x_old, f, g, -g(x_old))
         x_new = x_old - g(x_old) * alpha
 
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
+
         if((np.abs(x_old - x_new) < eps).all()):
             break
 
     x_ = x_new
-    return x_
+    return x_, iterations
 
 
-def bfgs(x0, B0, f, gf, eps=1e-5):
+def bfgs(x0, B0, f, gf, eps=1e-5, display=False):
     """
     Minimizes an n-dimensional function given the approximation for
     the hessian at x0, the function f and its gradient gf.
@@ -397,7 +450,16 @@ def bfgs(x0, B0, f, gf, eps=1e-5):
         Gradient of function.
     eps : float
         Error tolerance.
+
+    Returns
+    -------
+    x_ : array_like
+        Local minimum of function.
+    iterations : int
+        Number of iterations taken to reach minimum.
     """
+    iterations = 0
+
     x_old = np.array(x0)
     B_old = B0
 
@@ -409,6 +471,11 @@ def bfgs(x0, B0, f, gf, eps=1e-5):
             - np.dot(B_old, np.dot(s, np.dot(s.T, B_old))) / \
             np.dot(s.T, np.dot(B_old, s))
 
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
+
         if((np.abs(x_new - x_old) <= eps).all()):
             break
 
@@ -416,4 +483,4 @@ def bfgs(x0, B0, f, gf, eps=1e-5):
         B_old = B_new
 
     x_ = x_new
-    return x_
+    return x_, iterations
