@@ -329,6 +329,7 @@ def broyden(f, x0, B0, eps=1e-5, display=False):
             print 'B', B_new
         iterations += 1
 
+        # convergence check
         if(np.all(np.abs(x_old - x_new) <= eps)):
             break
 
@@ -378,6 +379,7 @@ def newtonn(f, J, x0, eps=1e-5, display=False):
                 print 'x: ', x_new
             iterations += 1
 
+            # convergence check
             if(np.all(np.abs(x_old - x_new) <= eps)):
                 break
 
