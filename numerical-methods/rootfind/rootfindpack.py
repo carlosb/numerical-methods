@@ -36,7 +36,7 @@ __all__ = ['bisection', 'newton1', 'secant', 'newtonn',
            'inv_cuadratic_interp', 'lin_fracc_interp']
 
 
-def bisection(f, a, b, eps=1e-5):
+def bisection(f, a, b, eps=1e-5, display=False):
     """
     Find root of f.
 
@@ -45,20 +45,23 @@ def bisection(f, a, b, eps=1e-5):
     Parameters
     ----------
     f : function
-            Function we want to find the root of.
+        Function we want to find the root of.
     a : float
-            Lower bound.
+        Lower bound.
     b : float
-            High bound.
+        High bound.
     eps : float
-            Tolerance.
+        Tolerance.
 
     Returns
     -------
     m : float
-            Root of f.
-
+        Root of f.
+    iterations : int
+        Number of iterations taken to find root.
     """
+    iterations = 0
+
     if a > b:
         a, b = b, a
 
@@ -70,10 +73,15 @@ def bisection(f, a, b, eps=1e-5):
         else:
             b = m
 
-    return m
+        if display:
+            print 'iteration ', iterations
+            print 'm: ', m
+        iterations += 1
+
+    return m, iterations
 
 
-def newton1(f, df, x0, eps=1e-5):
+def newton1(f, df, x0, eps=1e-5, display=False):
     """
     Find root of f.
 
@@ -96,6 +104,8 @@ def newton1(f, df, x0, eps=1e-5):
             Root of f.
 
     """
+    iterations = 0
+
     x_old = np.float(x0)
     x_new = x_old
 
@@ -104,6 +114,11 @@ def newton1(f, df, x0, eps=1e-5):
             x_old = x_new
             x_new = x_old - f(x_old) / df(x_old)
 
+            if display:
+                print 'iteration ', iterations
+                print 'x: ', x_new
+            iterations += 1
+
             if(abs(x_old - x_new) <= eps):
                 break
 
@@ -111,28 +126,32 @@ def newton1(f, df, x0, eps=1e-5):
             return np.nan
 
     root = x_new
-    return root
+    return root, iterations
 
 
-def secant(f, x0, x1, eps=1e-5):
+def secant(f, x0, x1, eps=1e-5, display=False):
     """
     Parameters
     ----------
     f : function
-            Function we want to find the root of.
+        Function we want to find the root of.
     x0 : float
-            First initial value "close" to the root of f.
+        First initial value "close" to the root of f.
     x1: float
-            Second initial value "close" to the root of f.
+        Second initial value "close" to the root of f.
     eps : float
-            Tolerance.
+        Tolerance.
 
     Returns
     -------
     root : float
-            Root of f.
+        Root of f.
+    iterations : int
+        Number of iterations taken to find root.
 
     """
+    iterations = 0
+
     x_old_0 = x0
     x_old_1 = x1
 
@@ -144,14 +163,19 @@ def secant(f, x0, x1, eps=1e-5):
         x_new = x_old_1 - f(x_old_1) * \
             ((x_old_1 - x_old_0) / (f(x_old_1) - f(x_old_0)))
 
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
+
         if(abs(x_old_1 - x_new) < eps):
             break
 
     root = x_new
-    return root
+    return root, iterations
 
 
-def inv_cuadratic_interp(f, a, b, c, eps=1e-5):
+def inv_cuadratic_interp(f, a, b, c, eps=1e-5, display=False):
     """
     Find root of f.
 
@@ -173,8 +197,11 @@ def inv_cuadratic_interp(f, a, b, c, eps=1e-5):
     -------
     root : float
             Root of f.
-
+    iterations : int
+        Number of iterations taken to find root.
     """
+    iterations = 0
+
     while True:
         u = f(b) / f(c)
         v = f(b) / f(a)
@@ -189,14 +216,19 @@ def inv_cuadratic_interp(f, a, b, c, eps=1e-5):
         b = c
         c = x_new
 
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
+
         if(abs(f(x_new)) < eps):
             break
 
     root = x_new
-    return root
+    return root, iterations
 
 
-def lin_fracc_interp(f, a, b, c, eps=1e-5):
+def lin_fracc_interp(f, a, b, c, eps=1e-5, display=False):
     """
     Find root of f.
 
@@ -206,19 +238,23 @@ def lin_fracc_interp(f, a, b, c, eps=1e-5):
     Parameters
     ----------
     f : function
-            Function we want to find the root of.
+        Function we want to find the root of.
     a : float
-            First initial value.
+        First initial value.
     b : float
-            Second initial value.
+        Second initial value.
     c : float
-            Third initial value.
+        Third initial value.
 
     Returns
     -------
     root : float
-            Root of f.
+        Root of f.
+    iterations : int
+        Number of iterations taken to find root.
     """
+    iterations = 0
+
     while True:
         numerator = (a - c) * (b - c) * (f(a) - f(b)) * f(c)
         denominator = (a - c) * (f(c) - f(b)) * f(a) - \
@@ -232,14 +268,19 @@ def lin_fracc_interp(f, a, b, c, eps=1e-5):
         b = c
         c = x_new
 
+        if display:
+            print 'iteration ', iterations
+            print 'x: ', x_new
+        iterations += 1
+
         if(abs(f(x_new)) < eps):
             break
 
     root = x_new
-    return root
+    return root, iterations
 
 
-def broyden(f, x0, B0, eps=1e-5):
+def broyden(f, x0, B0, eps=1e-5, display=False):
     """
     Finds roots for functions of k-variables.
 
@@ -263,7 +304,11 @@ def broyden(f, x0, B0, eps=1e-5):
     -------
     root : array_like
         Root of function.
+    iterations : int
+        Number of iterations taken to find root.
     """
+    iterations = 0
+
     x_new = x0
     B_new = B0
     while True:
@@ -278,14 +323,20 @@ def broyden(f, x0, B0, eps=1e-5):
         B_new = B_old + (np.dot((y - np.dot(B_old, s)), s.T)
                          ) / (np.dot(s.T, s))
 
+        if display:
+            print 'iteration ', iterations
+            print 'x:', x_new
+            print 'B', B_new
+        iterations += 1
+
         if(np.all(np.abs(x_old - x_new) <= eps)):
             break
 
     root = x_new
-    return root
+    return root, iterations
 
 
-def newtonn(f, J, x0, eps=1e-5):
+def newtonn(f, J, x0, eps=1e-5, display=False):
     """
     Finds roots for functions of k-variables.
 
@@ -309,7 +360,11 @@ def newtonn(f, J, x0, eps=1e-5):
     -------
     root : array_like
         Root of function.
+    iterations : int
+        Number of iterations taken to find root.
     """
+    iterations = 0
+
     x_old = x0
     x_new = x_old
 
@@ -317,6 +372,11 @@ def newtonn(f, J, x0, eps=1e-5):
         while True:
             x_old = x_new
             x_new = x_old - np.dot(np.linalg.inv(J(x0)), f(x_old))
+
+            if display:
+                print 'iteration ', iterations
+                print 'x: ', x_new
+            iterations += 1
 
             if(np.all(np.abs(x_old - x_new) <= eps)):
                 break
@@ -326,4 +386,4 @@ def newtonn(f, J, x0, eps=1e-5):
         return None
 
     root = x_new
-    return root
+    return root, iterations
