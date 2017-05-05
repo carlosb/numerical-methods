@@ -366,13 +366,11 @@ def newtonn(f, J, x0, eps=1e-5, display=False):
     """
     iterations = 0
 
-    x_old = x0
-    x_new = x_old
-
+    x_new = x0
     try:
         while True:
             x_old = x_new
-            x_new = x_old - np.dot(np.linalg.inv(J(x0)), f(x_old))
+            x_new = x_old - np.dot(np.linalg.inv(J(x_old)), f(x_old))
 
             if display:
                 print 'iteration ', iterations
