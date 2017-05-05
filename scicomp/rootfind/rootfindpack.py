@@ -310,13 +310,12 @@ def newtonn(f, J, x0, eps=1e-5):
     root : array_like
         Root of function.
     """
-    x_old = x0
-    x_new = x_old
+    x_new = x0
 
     try:
         while True:
             x_old = x_new
-            x_new = x_old - np.dot(np.linalg.inv(J(x0)), f(x_old))
+            x_new = x_old - np.dot(np.linalg.inv(J(x_old)), f(x_old))
 
             if(np.all(np.abs(x_old - x_new) <= eps)):
                 break
