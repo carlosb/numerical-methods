@@ -387,3 +387,95 @@ def newtonn(f, J, x0, eps=1e-5, display=False):
 
     root = x_new
     return root, iterations
+
+
+def brent(f, a, b, eps=1e-5, display=False):
+    """
+    Finds root of a one dimensional function.
+
+    This function utilizes Brent's method for root finding
+    to find roots in a one dimensional function. To do this,
+    it needs a function and an interval which contains the
+    root.
+
+    Parameters
+    ----------
+    f : function
+        Function we want to find the root of.
+    a : float
+        Low bound of interval
+    b : float
+        High bound of interval
+    eps : float
+        Tolerance.
+
+    Returns
+    -------
+    root : float
+        Root of function.
+    iterations : int
+        Number of iterations taken to find root.
+    """
+
+    iterations = 0
+    mflag = False
+    d = 0.
+
+    if f(a) * f(b) >= 0:
+        raise ValueError('root is not bracketed')
+
+    if(abs(f(a)) < abs(f(b))):
+        a, b = b, a  # swap vlaues
+
+    c = a
+    mflag = True
+
+    while (True):
+        if f(a) != f(c) and f(b) != f(c):
+            # inverse quadratic interpolation
+            s = (a * f(b) * f(c)) / ((f(a) - f(b)) * (f(a) - f(c))) + \
+                (b * f(a) * f(c)) / ((f(b) - f(a)) * (f(b) - f(c))) + \
+                (c * f(a) * f(b)) / ((f(c) - f(a)) * (f(c) - f(b)))
+        else:
+            # secant method
+            s = b - f(b) * (b - a) / (f(b) - f(a))
+
+        tmp1 = (3. * a + b) / 4.
+        tmp2 = b
+        if tmp1 > tmp2:
+            tmp1, tmp2 = tmp2, tmp1
+
+        if not (tmp1 < s < tmp2) or \
+                mflag and (abs(s - b)) >= (abs(c - d) / 2.) or \
+                not mflag and (abs(s - b)) >= (abs(c - d) / 2.) or \
+                mflag and (abs(b - c)) < abs(eps) or \
+                not mflag and (abs(c - d)) < abs(eps):
+
+            # bisection method
+            s = (a + b) / 2.
+            mflag = True
+        else:
+            mflag = False
+
+        d = c
+        c = b
+
+        if f(a) * f(s) < 0:
+            b = s
+        else:
+            a = s
+
+        if abs(f(a)) < abs(f(b)):
+            a, b = b, a
+
+        if display:
+            print 'iteration: ', iterations
+            print 'x: ', s
+        iterations += 1
+
+        # convergence check
+        if f(b) == 0 or f(s) == 0 or (abs(b - a) < eps):
+            break
+
+    root = s
+    return root, iterations
