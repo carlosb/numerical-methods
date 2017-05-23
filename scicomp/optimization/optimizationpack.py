@@ -4,13 +4,14 @@ Optimization Methods
 
 Routines in this module:
 
-golden_section(a, b, f, eps=1e-5)
-successive_parabolic_interp(u, v, w, f, eps=1e-5)
-newton1(x0, g, h, eps=1e-5)
-newtonn(x0, g, h, eps=1e-5)
-nelder_mead(xs0, n, f, eps=1e-5, alpha=1., beta=2., gamma=0.5, sigma=0.5)
-bfgs(x0, B0, f, gf, eps=1e-5)
-gradient_descent(x0, f, g, eps=1e-5, rho=0.5, c=0.1, alpha=1e-3)
+golden_section(f, a, b, eps=1e-5)
+successive_parabolic_interp(f, u, v, w, eps=1e-5)
+newton1(g, h, x0, eps=1e-5)
+newtonn(g, h, x0, eps=1e-5)
+nelder_mead(f, xs0, n, eps=1e-5, alpha=1., beta=2., gamma=0.5, sigma=0.5)
+bfgs(f, gf, x0, B0, eps=1e-5)
+gradient_descent(f, g, x0, eps=1e-5, rho=0.5, c=0.1, alpha=1e-3)
+brent(f, a, b, eps=1e-5)
 
 TODO
 ====
@@ -43,10 +44,14 @@ __all__ = ['golden_section',
            'newton1',
            'newtonn',
            'gradient_descent',
-           'bfgs']
+           'bfgs',
+           'brent',
+           'nelder_mead',
+           'bfgs_line',
+           'cg']
 
 
-def golden_section(a, b, f, eps=1e-5, display=False):
+def golden_section(f, a, b, eps=1e-5, display=False):
     """
     Finds a minimum of a function in the interval [a,b].
 
@@ -106,7 +111,7 @@ def golden_section(a, b, f, eps=1e-5, display=False):
     return x_, iterations
 
 
-def successive_parabolic_interp(u, v, w, f, eps=1e-5, display=False):
+def successive_parabolic_interp(f, u, v, w, eps=1e-5, display=False):
     """
     Finds the a minimum with initial values u, v, w close to the minimum.
 
@@ -162,7 +167,7 @@ def successive_parabolic_interp(u, v, w, f, eps=1e-5, display=False):
     return x_, iterations
 
 
-def newton1(x0, g, h, eps=1e-5, display=False):
+def newton1(g, h, x0, eps=1e-5, display=False):
     """
     Minimizes a one dimensional function with first derivative g
     and second derivative h.
@@ -209,7 +214,7 @@ def newton1(x0, g, h, eps=1e-5, display=False):
     return x_, iterations
 
 
-def newtonn(x0, g, h, eps=1e-5, display=False):
+def newtonn(g, h, x0, eps=1e-5, display=False):
     """
     Minimizes an n-dimensional function with gradient g and hessian h.
 
@@ -251,7 +256,7 @@ def newtonn(x0, g, h, eps=1e-5, display=False):
     return x_, iterations
 
 
-def nelder_mead(xs0, n, f, eps=1e-5,
+def nelder_mead(f, xs0, n, eps=1e-5,
                 alpha=1., beta=2., gamma=0.5,
                 sigma=0.5, display=False):
     """
@@ -294,7 +299,7 @@ def nelder_mead(xs0, n, f, eps=1e-5,
     n += 1
 
     if(len(xs0) != n):
-        raise Exception('n+1 != len( xs0 )')
+        raise ValueError('n+1 != len( xs0 )')
 
     x_new = np.zeros(n - 1)
     while True:
@@ -315,7 +320,7 @@ def nelder_mead(xs0, n, f, eps=1e-5,
         x_old = x_new
         x_new = xs[n - 1]
         if(np.all(np.abs(x_new - x_old) <= eps)):
-            return xs[0]
+            return x_new, iterations
 
         # centroid
         centroid = 0.0
@@ -369,7 +374,7 @@ def backtrack(alpha, rho, c, x, f, grad_f, p):
     return alpha
 
 
-def gradient_descent(x0, f, g, eps=1e-5, rho=0.5,
+def gradient_descent(f, g, x0, eps=1e-5, rho=0.5,
                      c=0.1, alpha=1e-5, display=False):
     """
     Minimizes an n-dimensional function given the function f and its gradient.
@@ -429,7 +434,7 @@ def gradient_descent(x0, f, g, eps=1e-5, rho=0.5,
     return x_, iterations
 
 
-def bfgs(x0, B0, f, gf, eps=1e-5, display=False):
+def bfgs(f, gf, x0, B0, eps=1e-5, display=False):
     """
     Minimizes an n-dimensional function given the approximation for
     the hessian at x0, the function f and its gradient gf.
@@ -464,7 +469,7 @@ def bfgs(x0, B0, f, gf, eps=1e-5, display=False):
     B_old = B0
 
     while True:
-        s = np.dot(np.linalg.inv(B_old), - gf(x_old))
+        s = np.dot(np.linalg.inv(B_old), -gf(x_old))
         x_new = (x_old + s.T).flatten()
         y = gf(x_new) - gf(x_old)
         B_new = B_old + np.dot(y, y.T) / np.dot(y.T, s) \
@@ -484,3 +489,84 @@ def bfgs(x0, B0, f, gf, eps=1e-5, display=False):
 
     x_ = x_new
     return x_, iterations
+
+def bfgs_line(f, gf, x0, B0, alpha=0.001, eps=1e-5, display=False):
+    x_old = np.array(x0)
+    B_old = B0
+    it = 0
+    while True:
+        s = np.dot(np.linalg.inv(B_old), -gf(x_old))
+        x_new = (x_old + alpha*s.T).flatten()
+        y = gf(x_new) - gf(x_old)
+        B_new = B_old + np.dot(y,y.T)/np.dot(y.T, s) - np.dot(B_old, np.dot(s, np.dot(s.T, B_old)))/np.dot(s.T, np.dot(B_old, s))
+
+        if display:
+            print 'iteration ', it
+            print 'x: ', x_new
+        it += 1
+
+        if(np.all(np.abs(x_new - x_old) <= eps)):
+            break
+            
+        it += 1
+        
+        x_old = x_new
+        B_old = B_new
+            
+    return x_new, it
+
+def cg(f, grad_f, x0, eps=1e-5, c=0.1, alpha=0.1):
+    x_old = x0
+
+    g_old = grad_f(x0).flatten()
+    s_old = -g_old
+    it = 0
+    while(True):
+        alpha = backtrack(alpha, 0.5, c, x_old, f, grad_f, s_old)
+        x_new = (x_old + alpha * s_old).flatten()
+        g_new = grad_f(x_new).flatten()
+        beta = np.dot(g_new.T, g_new) / np.dot(g_old.T, g_old)  # scalar value
+        s_new = -g_new + beta * s_old
+
+        if((np.abs(x_old - x_new) < eps).all()):
+            break
+
+        it += 1
+
+        x_old = x_new
+        g_old = g_new
+        s_old = s_new
+
+    return x_new, it
+
+
+def brent(df, a, b, eps=1e-5, display=False):
+    """
+    Minimize a function one dimensional function given
+     its derivative df.
+
+    This function will minimize a function without
+    the need to specify the function itself. It basically
+    finds the root of the derivative using Brent's method.
+
+    Parameters
+    ----------
+    df : function
+        Derivative of function.
+    a : float
+        Low bound of interval containing root.
+    b : float
+        High bound of interval containing root.
+    eps : float
+        Tolerance
+
+    Returns
+    -------
+    x_ : float
+        Minimum of function
+    it : int
+        Number of iterations taken to reach minimum.
+    """
+    from .. import rootfind
+    x_, it = rootfind.brent(df, a, b, eps, display)
+    return x_, it

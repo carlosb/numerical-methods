@@ -37,7 +37,7 @@ xs0 = np.array([
 
 x0 = np.array([2, 4])
 
-print 'Minimum: ', opt.nelder_mead(xs0, 2, f)
-print 'Minimum:', opt.newtonn(x0, grad_f, hessian_f)
-print 'Minimum: ', opt.gradient_descent(x0, f, grad_f)
-print 'Minimum: ', opt.bfgs(x0, hessian_f(x0), f, grad_f)
+print 'Minimum: ', opt.nelder_mead(f, xs0, 2)
+print 'Minimum:', opt.newtonn(grad_f, hessian_f, x0)
+print 'Minimum: ', opt.gradient_descent(f, grad_f, x0)
+print 'Minimum: ', opt.bfgs(f, grad_f, x0, hessian_f(x0))

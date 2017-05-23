@@ -33,7 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 __all__ = ['bisection', 'newton1', 'secant', 'newtonn',
-           'inv_cuadratic_interp', 'lin_fracc_interp']
+           'inv_cuadratic_interp', 'lin_fracc_interp',
+           'brent']
 
 
 def bisection(f, a, b, eps=1e-5, display=False):
