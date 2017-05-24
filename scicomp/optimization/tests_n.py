@@ -35,7 +35,7 @@ xs0 = np.array([
     [-1.2, 0.4]
 ])
 
-x0 = np.array([2, 4])
+x0 = np.array([-1, 5])
 
 print 'Minimum: ', opt.nelder_mead(f, xs0, 2)
 print 'Minimum:', opt.newtonn(grad_f, hessian_f, x0)

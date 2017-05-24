@@ -35,8 +35,8 @@ plt.xlabel('$x$')
 plt.ylabel('$f(x)$')
 
 # FIND MIN
-print 'Min is: ', opt.golden_section(-3, 3, f)
-print 'Min is: ', opt.successive_parabolic_interp(-1, -2, -3, f)
-print 'Min is: ', opt.newton1(-3, f1, f11)
+print 'Min is: ', opt.golden_section(f, -3, 3)
+print 'Min is: ', opt.successive_parabolic_interp(f, -1, -2, -3, )
+print 'Min is: ', opt.newton1(f1, f11, -3)
 
 plt.show()
