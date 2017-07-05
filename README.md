@@ -1,7 +1,7 @@
 # Description
 This is a collection of various numerical methods implemented in Python. Every method is implemented
-using Numpy arrays. The intention of this package is for anyone who wants to have simple and concices
-implementation of various different numerical methods. To import simply use the import command:
+using Numpy arrays. The intention of this package is for anyone who wants to have simple and concice
+implementations of various different numerical methods. To import simply use the import command:
 
 ````Python
 import scicomp as sc
