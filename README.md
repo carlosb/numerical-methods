@@ -1,3 +1,5 @@
+[![GitHub license](https://img.shields.io/github/license/carlosb/scicomp.svg)](https://github.com/carlosb/scicomp/blob/master/LICENSE)
+
 # Description
 This is a collection of various numerical methods implemented in Python. Every method is implemented
 using Numpy arrays. The intention of this package is for anyone who wants to have simple and concice
